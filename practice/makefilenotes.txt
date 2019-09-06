@@ -1,0 +1,19 @@
+CXX      = g++
+CXX_FILE = $(wildcard *.cpp)
+TARGET   = $(patsubst %.cpp,%,$(CXX_FILE))
+CXXFLAGS = -g -std=c++11 -Wall -Werror -pedantic-errors -fmessage-length=0
+
+all:
+	$(CXX) $(CXXFLAGS) $(CXX_FILE) -o $(TARGET)
+clean:
+	rm -f $(TARGET) $(TARGET).exe
+
+
+-g -- include debug information into executable to trace through with debugger (real world: -g - debug release, -O3 for real release)
+-std=c++11 -- using c++ standard 11 for this program
+-Wall -- warn on all things that might be wrong
+-Werror -- turn warnings into errors, i.e. do not compile on warnings
+-pedantic-errors -- catch even more mistakes
+-fmessage-length=0 -- formatting crap
+-o -- signifies output file name
+
