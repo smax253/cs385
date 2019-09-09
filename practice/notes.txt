@@ -1,0 +1,24 @@
+9/9/2019
+algorithm - a sequence of unambiguous intstructions for solving a problem
+i.e. for obtaining a required output for any legitimate input in a finite amount of time
+4 important points --
+1. The non-ambiguity requirement for each step of an algorithm cannot be compromised
+2. The range of inputs for which an algorithm works has to be specified carefully
+3. The same algorithm can be represented in several different ways
+4. There may exist several algorithms for solving the same problem
+
+sequential search
+search through entire length of array until key is found.
+Assume: (1) probability of a successful sequential search is equal to p where p(0<=p<=1)
+        (2) probability of the first match occurring in the ith position is the same for every i
+Therefore, with a successful search, the probability of the first match occurring in the ith position is p/n for every i
+Number of comparisons: i
+Number of comparisons (unsuccessful): n, probability of such a search being 1-p
+Cavg(n) = [1*p/n + 2*p/n + ... + i*p/n + ... + n*p/n] + n*(1-p)
+        = p/n[1 + 2 + 3 ... + n] + n(1-p)
+        = p(n+1)/2 + n(1-p)
+    if p = 1, Cavg(n) = (n+1)/2
+    if p = 0, Cavg(n) = n
+O(g(n)) = {f(n) : exists positive constants c and n0 s.t. O <= f(n) <= c*g(n) for all n >= n0}
+Omega(g(n)) = {f(n) : exists positive constants c and n0 s.t. 0 <= c*g(n) <= f(n) for all n >= n0}
+Theta(g(n)) = {f(n) : exists positive constants c1, c2, and n0 s.t. 0 <= c1*g(n) <= f(n) <= c2*g(n) for all n >= n0}
