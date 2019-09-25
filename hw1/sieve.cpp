@@ -52,13 +52,14 @@ void PrimesSieve::display_primes() const {
     if (num_primes_<primes_per_row){
         multi_row = false;
     }
-    cout << setfill(' ');
+    
     int rowcounter = 0;
     for(int i = 2; i<limit_+1; i++){
         if(is_prime_[i]){
+            
             if(multi_row){
                 if(rowcounter >= primes_per_row){
-                    cout << endl;
+                    cout<< endl;
                     cout << setw(max_prime_width) << i;
                     rowcounter = 1;
                 }else if (rowcounter == 0){
@@ -93,11 +94,11 @@ int PrimesSieve::count_num_primes() const {
 }
 
 void PrimesSieve::sieve() {
-    // Uses Erasthothenes's Sieve to calculate primes
+    // Uses Eratosthenes's Sieve to calculate primes
     for(int i = 0; i<limit_+1; i++){
         is_prime_[i] = true;
     }
-    for (int i = 2; i<limit_+1; i++){
+    for (int i = 2; i<=sqrt(limit_+1); i++){
         if (is_prime_[i]){
             for (int j = i*i; j<limit_+1; j+=i){
                 
@@ -105,9 +106,14 @@ void PrimesSieve::sieve() {
                     is_prime_[j] = false;
                 }
             }
-            max_prime_ = i;
+            
             //cout<<"done: " << i << endl;
         }
+    }
+    int index = limit_;
+    while(index>0 && max_prime_ == 0){
+        if (is_prime_[index]) max_prime_ = index;
+        index--;
     }
     num_primes_ = count_num_primes();
 }
@@ -148,7 +154,6 @@ int main() {
     PrimesSieve sieve(limit);
     //print number of primes
     cout << endl << "Number of primes found: " << sieve.num_primes() << endl;
-    //print out list of primes
     cout << "Primes up to " << limit << ":" << endl;
     sieve.display_primes();
     return 0;
