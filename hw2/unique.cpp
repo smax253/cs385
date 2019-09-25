@@ -11,7 +11,7 @@
 using namespace std;
 
 bool is_all_lowercase(const string &s) {
-    // TODO: returns true if all characters in string are lowercase
+    // Returns true if all characters in string are lowercase
     // letters in the English alphabet; false otherwise.
     for(auto it = s.cbegin(); it != s.cend(); ++it){
         int diff = *it-'a';
@@ -21,7 +21,7 @@ bool is_all_lowercase(const string &s) {
 }
 
 bool all_unique_letters(const string &s) {
-    // TODO: returns true if all letters in string are unique, that is
+    // Returns true if all letters in string are unique, that is
     // no duplicates are found; false otherwise.
     // You may use only a single int for storage and work with bitwise
     // and bitshifting operators.
@@ -37,7 +37,7 @@ bool all_unique_letters(const string &s) {
 }
 
 int main(int argc, char * const argv[]) {
-    // TODO: reads and parses command line arguments.
+    // Reads and parses command line arguments.
     // Calls other functions to produce correct output.
     if(argc!=2){
         cerr << "Usage: " << argv[0] << " <string>"
