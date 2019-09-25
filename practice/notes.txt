@@ -22,3 +22,61 @@ Cavg(n) = [1*p/n + 2*p/n + ... + i*p/n + ... + n*p/n] + n*(1-p)
 O(g(n)) = {f(n) : exists positive constants c and n0 s.t. O <= f(n) <= c*g(n) for all n >= n0}
 Omega(g(n)) = {f(n) : exists positive constants c and n0 s.t. 0 <= c*g(n) <= f(n) for all n >= n0}
 Theta(g(n)) = {f(n) : exists positive constants c1, c2, and n0 s.t. 0 <= c1*g(n) <= f(n) <= c2*g(n) for all n >= n0}
+
+O-notation --
+100n+5 in O(n^2)? yes
+100n+5 <= 100n+n (for all n>=5) = 101n <= 101n^2 (c = 101, n0 = 5)
+OR
+100n+5 <= 100n+5n (for all n>=1) = 105n <= 105n^2 (c = 105, n0 = 1)
+OR
+100n+5 <= n^2 (for all n>=101) (c=1, n0 = 101)
+
+e.g. 
+3n+8 in O(n) --
+3n + 8 <= 4n (c = 4, n0 = 8)
+3n + 8 <= 3n + 8n (c = 8, n0 = 1)
+
+Omega(5n^2) -- Omega(n^2)
+5n^2<5n^2 (c = 5, n0 = 1)
+
+Does f(n) = 100n + 5 belong in Omega(n^2)? no
+Let there exist positive constants c and n0 s.t.
+0 <= cn^2 <= 100n+5
+100n+5 <= 100n+5n (for all n >= 1) = 105n
+cn^2 <= 105n
+cn^2 - 105n <= 0
+n(cn-105)<=0
+n=0, cn-105 = 0
+cn = 105
+c = 105/n
+n cannot be <= a constant as it holds for n<=105/c. n trends toward positive as n increases.
+
+1/2 (n)(n-1) in theta(n^2)? yes
+upper bound --
+n^2/2 - n/2 <= n^2/2 for all n>=1
+lower bound -- 
+n^2/2 - n/2 >= n^2/2 - n/2*n/2 = 1/4 n^2 for all n>=2
+
+prove false by setting n <= constant/c, because n cannot be <= a constant.
+
+Combinatorics:
+# of permutations of an n-element set: P(n) = n!
+# of combinations of an n-element set: C(n, k) = n! / (k! * (n-k)!)
+# of subsets of an n-element set: 2^n
+
+9/18/2019
+
+backwards substitution --
+(analysis of recursive algorithms)
+initial condition - base case
+x(n) = 1*x(n-1) + (n-1)
+1 -- how many times recursive call is made
+x(n-1) -- how the input size changes in the recursive call
+n-1 -- how much work is performed excluding the recursive call
+
+repeat a few times
+write general term
+set inner general term to initial condition and solve for k
+substitute k into general term
+
+can substitute n for 2^k in lg n based algorithms

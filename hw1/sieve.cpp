@@ -48,16 +48,23 @@ PrimesSieve::PrimesSieve(int limit) :
 void PrimesSieve::display_primes() const {
     // displays the primes using correct spacing for each row
     const int max_prime_width = num_digits(max_prime_), primes_per_row = 80 / (max_prime_width + 1);
-    bool multi_row = true;
-    if (num_primes_<primes_per_row){
-        multi_row = false;
-    }
     
-    int rowcounter = 0;
-    for(int i = 2; i<limit_+1; i++){
-        if(is_prime_[i]){
-            
-            if(multi_row){
+    if (num_primes_<primes_per_row){
+        for(int i = 2; i<limit_+1; i++){
+            if(is_prime_[i]){
+                if (i == 2){
+                    cout << i;
+                }else{
+                    cout << " " << i;
+                }
+            }
+        }
+    }
+    else{
+        cout << setfill(' ');
+        int rowcounter = 0;
+        for(int i = 2; i<limit_+1; i++){
+            if(is_prime_[i]){
                 if(rowcounter >= primes_per_row){
                     cout<< endl;
                     cout << setw(max_prime_width) << i;
@@ -70,14 +77,7 @@ void PrimesSieve::display_primes() const {
                     cout << setw(max_prime_width+1) << i;
                     rowcounter += 1;
                 }
-            }else{
-                if (i == 2){
-                    cout << i;
-                }else{
-                    cout << " " << i;
-                }
             }
-            
         }
     }
 }
