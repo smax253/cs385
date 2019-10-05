@@ -5,6 +5,8 @@
         "ostream": "cpp",
         "iomanip": "cpp",
         "cmath": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "algorithm": "cpp",
+        "queue": "cpp"
     }
 }
