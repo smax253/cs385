@@ -11,13 +11,12 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <map>
 
 using namespace std;
-
-vector< vector<int> > get_ways(int num_stairs) {
-    // Returns a vector of vectors of ints representing
-    // the different combinations of ways to climb num_stairs
-    // stairs, moving up either 1, 2, or 3 stairs at a time.
+vector< vector<int> > get_ways_helper(int num_stairs, map<int, vector<vector<int>>> *memo){
+    // Implements stair climber using memoization/dynamic 
+    // programming using the map object in C++
     auto result = vector<vector<int>>();
     if (num_stairs<=0) {
         result.push_back(vector<int>());
@@ -25,14 +24,27 @@ vector< vector<int> > get_ways(int num_stairs) {
     }
     for(int i = 1; i<4; i++){
         if(num_stairs>=i){
-            vector<vector<int>> ways = get_ways(num_stairs-i);
+            vector<vector<int>> ways;
+            //cout<< "hello!"<<endl;
+            auto lookup = memo->find(num_stairs-i);
+            //cout<<(lookup != memo->end())<<endl;
+            if(lookup != memo->end()) ways = lookup->second;
+            else ways = get_ways_helper(num_stairs-i, memo);
             for(vector<int> step : ways){
                 step.insert(step.begin(),i);
                 result.push_back(step);
             }
         }
     }
+    memo->insert(pair<int,vector<vector<int>>>(num_stairs, result));
     return result;
+}
+vector< vector<int> > get_ways(int num_stairs) {
+    // Returns a vector of vectors of ints representing
+    // the different combinations of ways to climb num_stairs
+    // stairs, moving up either 1, 2, or 3 stairs at a time.
+    map<int, vector<vector<int>>> memo;
+    return get_ways_helper(num_stairs, &memo);
 
 }
 
