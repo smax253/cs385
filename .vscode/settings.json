@@ -8,6 +8,8 @@
         "vector": "cpp",
         "xtree": "cpp",
         "utility": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "algorithm": "cpp",
+        "queue": "cpp"
     }
 }
