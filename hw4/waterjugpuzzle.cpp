@@ -35,6 +35,7 @@ struct State {
         return current.to_string();
     }
 };
+
 void link_and_queue(State current, State next, queue<State> &store, vector<vector<pair<int,int>>> &link){
     //Take a potential next step and store it in queue and link in array only if not visited before
     if(link[next.a][next.b] == pair<int,int>(-1,-1)){
@@ -42,6 +43,7 @@ void link_and_queue(State current, State next, queue<State> &store, vector<vecto
         store.push(next);
     }
 }
+
 void pour_buckets(State current, State capacity, State goal, queue<State> &store, vector<vector<pair<int,int>>> &link){
     //Pour each bucket if possible in the given order in the problem
     if(current.equals(goal)) return;
@@ -76,6 +78,7 @@ void pour_buckets(State current, State capacity, State goal, queue<State> &store
         link_and_queue(current, next, store, link);
     }
 }
+
 const void printSolution(State goal, vector<vector<pair<int,int>>> &link){
     //Print solution to the problem
     pair<int, int> current(0,0);
@@ -143,16 +146,15 @@ void solve(State capacity, State goal){
     }
 }
 
-
 int main(int argc, char * const argv[]) {
-    if (argc != 7){
+    if (argc != 7){     //check number of arguments
         cerr << "Usage: " << argv[0] << " <cap A> <cap B> <cap C> <goal A> <goal B> <goal C>"
              << endl;
         return 1; 
     }
     vector<int> inputs;
     istringstream iss;
-    for (int i = 1; i<7; i++){
+    for (int i = 1; i<7; i++){ //parse arguments and store in vector, throw error if invalid
         iss.str(argv[i]);
         int current;
         if(!(iss>>current) || (i<4 && current == 0) || current<0){
@@ -164,7 +166,7 @@ int main(int argc, char * const argv[]) {
         inputs.push_back(current);
         iss.clear();
     }
-    for (size_t i = 0; i<3; i++){
+    for (size_t i = 0; i<3; i++){  
         if(inputs[i] < inputs[i+3]){
             char jug = 'A'+i%3;
             cerr << "Error: Goal cannot exceed capacity of jug "<<jug<<"."<<endl;
