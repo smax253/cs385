@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Name          : quickselect.cpp
- * Author        :
- * Pledge        :
- * Date          :
+ * Author        : Max Shi
+ * Pledge        : I pledge my honor that I have abided by the Stevens Honor System.
+ * Date          : 10/17/2019
  * Description   : Implements the quickselect algorithm found on page 160 in
  *                 Algorithms, 3e by Anany Levitin.
  ******************************************************************************/
@@ -24,24 +24,18 @@ size_t lomuto_partition(int array[], size_t left, size_t right) {
         }
     }
     swap(array[left], array[pivotindex]);
-    cout<<pivotindex<<endl;
-    for(size_t i = left; i<=right; i++){
-        cout<<array[i]<<" ";
-    }
-    cout<<endl;
     return pivotindex;
 }
 
 int quick_select(int array[], size_t left, size_t right, size_t k) {
     size_t pivotindex = lomuto_partition(array, left, right);
-    //cout<<pivotindex<<endl;
-    if (pivotindex == k-1) return array[pivotindex];
-    else if (pivotindex>k-1) return quick_select(array, left, pivotindex-1, k);
-    else return quick_select(array, pivotindex+1, right, k-1-pivotindex);
+    if (pivotindex == k) return array[pivotindex];
+    else if (pivotindex>k) return quick_select(array, left, pivotindex-1, k);
+    else return quick_select(array, pivotindex+1, right, k);
 }
 
 int quick_select(int array[], const size_t length, size_t k) {
-    return quick_select(array, 0, length - 1, k);
+    return quick_select(array, 0, length - 1, k-1);
 }
 
 int main(int argc, char *argv[]) {
