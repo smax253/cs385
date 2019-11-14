@@ -17,19 +17,36 @@ struct Node {
 };
 
 Node* lowest_common_ancestor(Node *p, Node *q) {
-
+    return nullptr;
 }
 
-Node* create_bst_helper(int data[], int low, int high, int level) {
-
+Node* create_bst_helper(int data[], int low, int high, int level, Node *parent) {
+    if (low > high){
+        //cout<<low<<" : "<<high<<endl;
+        return nullptr;
+    }
+        int mid = low+(high-low)/2;
+        Node *next = new Node(parent, level, data[mid]);
+        next->left = create_bst_helper(data, low, mid-1, level+1, next);
+        next->right = create_bst_helper(data, mid+1, high, level+1, next);
+        return next;
 }
 
 Node* create_bst(int data[], int length) {
-
+    return create_bst_helper(data, 0, length-1, 0, nullptr);
 }
 
 bool is_bst(Node *n, int *min, int *max) {
-
+    if (n == nullptr) return true;
+    if (min != nullptr && n->data < *min){
+        return false;
+    }
+    else if(max != nullptr && n-> data > *max){
+        return false;
+    }
+    else{
+        return is_bst((n->left), min, &(n->data)) && is_bst((n->right), &(n->data), max);
+    }
 }
 
 bool is_bst(Node *tree) {
@@ -86,14 +103,14 @@ int main(int argc, const char *argv[]) {
     nodes[4] = new Node(nodes[2], 3, 4);
     nodes[5] = new Node(nodes[2], 3, 5);
     nodes[6] = new Node(nodes[5], 4, 6);
-
+    /*
     Node *common_ancestor = lowest_common_ancestor(nodes[node1], nodes[node2]);
     cout << "Lowest common ancestor: " << common_ancestor->data << endl << endl;
 
     for (int i = 1; i <= 6; ++i) {
         delete nodes[i];
     }
-
+    */
     int data[15] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     Node *bst = create_bst(data, 15);
     display_sideways(bst);

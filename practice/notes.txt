@@ -80,3 +80,9 @@ set inner general term to initial condition and solve for k
 substitute k into general term
 
 can substitute n for 2^k in lg n based algorithms
+
+
+11/4/2019
+Rotation = theta(1)
+Height of RBST = 2 lg(n+1)
+Before accessing field, make sure it is non-null.
