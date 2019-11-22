@@ -1,0 +1,183 @@
+/*******************************************************************************
+ * Name        : anagramfinder.cpp
+ * Author      : Kishan Patel
+ * Date        : 11/14/19
+ * Description : Finds anagrams in a dictionary
+ * Pledge      : I pledge my honor that I have abided by the Stevens Honor System.
+ ******************************************************************************/
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <algorithm>
+#include <array>
+#include <cstdio>
+#include <string>
+#include <fstream>
+using namespace std;
+
+//Used to create tuples
+struct State{
+string sorted_w, word;
+State(string _sorted_w, string _word): sorted_w(_sorted_w), word(_word){}
+State(): sorted_w(" "), word(""){}
+
+string getSorted(){
+    return sorted_w;
+}
+string getWord(){
+    return word;
+}
+
+string to_string(){
+    ostringstream oss;
+    oss << "(" << sorted_w << ", " << word << ")";
+    return oss.str();
+}
+};
+
+//sorts word by character and adds it into a tuple (sorted word, actual word)
+State sortedWord_tuples(string s){
+    string temp = s;
+    transform(s.begin(), s.end(), s.begin(),[](unsigned char c){ return std::tolower(c);});
+    sort(s.begin(),s.end());
+    State tempState(s,temp);
+    return tempState;
+    }
+// sorts word by charater and returns string
+string sortedWord(string s){
+    transform(s.begin(), s.end(), s.begin(),[](unsigned char c){ return std::tolower(c);});
+    sort(s.begin(),s.end());
+    return s;
+}
+//returns what the sorted string would be without modifying it
+string sortedWord_temp(string temp){
+    string s = temp;
+    transform(s.begin(), s.end(), s.begin(),[](unsigned char c){ return std::tolower(c);});
+    sort(s.begin(),s.end());
+    return s;
+}
+//used for error testing, printed out vectors
+void printList(vector<string> list){
+    for(size_t count = 0; count < list.size();count++){
+        cout << list.at(count) << endl;
+    }
+}
+//actual function that finds all the anagrams of the vector of string input
+void sortedList(vector<string> input, size_t size){
+    vector<State> list_Tuples;
+    vector<string> commons;
+    vector<string> list_sbl;
+    vector<string> outputs;
+    vector<string> finals;
+    int count = 0; 
+    int max = 0;
+    //pushes each word in array into an vector of tuples,  and sorts each word in the array
+    for(size_t i = 0; i < size; i++){
+        list_Tuples.push_back(sortedWord_tuples(input.at(i)));
+        list_sbl.push_back(sortedWord(input.at(i)));
+        input.at(i) = sortedWord(input.at(i));
+    }
+    sort(list_sbl.begin(),list_sbl.end()); //sorts character-sorted list 
+    //finds out which sorted character string occurs the most, pushes it into vector commons
+    for(size_t j = 1; j < size; j++){
+        if((list_sbl.at(j) == list_sbl.at(j-1))){
+            count++;
+            if(count >= max){
+                if(count > max){
+                max = count;
+                commons.clear();
+                }
+                commons.push_back(list_sbl.at(j));
+            }
+        }
+        else{
+            count = 0;
+        }
+    }
+    //finds out which words correspond to the sorted character string
+    for(size_t k = 0; k < size; k++){
+         for(size_t z = 0; z < commons.size(); z++){
+            if(commons.at(z) == list_Tuples.at(k).getSorted()){
+                outputs.push_back(list_Tuples.at(k).getWord());
+                break;
+            }     
+         }
+    }
+    sort(outputs.begin(),outputs.end());
+    //prints out the words with anagrams
+    while(!outputs.empty()){
+        finals.push_back(outputs.at(0));
+        outputs.erase(outputs.begin());
+        for(size_t v = 0; v < outputs.size(); v++){
+            if(sortedWord_temp(outputs.at(v)) == sortedWord_temp(finals.back())){
+                finals.push_back(outputs.at(v));
+                outputs.erase(outputs.begin()+v);
+                v--;
+            }
+        }
+
+    }
+    if(max == 0){
+        cout << "No anagrams found." << endl;
+    }
+    else{
+        cout << "Max anagrams: " << max+1 << endl;
+    
+    cout << finals.at(0) << endl;
+    for(size_t t = 1; t < finals.size(); t++){
+        if(sortedWord(finals.at(t)) == sortedWord(finals.at(t-1))){
+            cout << finals.at(t) << endl;
+        }
+        else{
+            cout << "" << endl;
+            cout << finals.at(t) << endl;
+        }
+    }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int main(int argc, char * const argv[]) {
+string file;
+istringstream iss;
+if (argc != 2) {
+    cerr << "Usage: " << argv[0] << " <dictionary file>"<< endl;
+    return 1;
+  }
+iss.str(argv[1]);
+iss>>file;
+vector<string> Test;
+string line;
+  ifstream myfile(file);
+  if (myfile.is_open())
+  {
+    while ( getline (myfile,line) )
+    {
+      Test.push_back(line);
+
+    }
+    myfile.close();
+  }
+
+  else{
+    cerr << "Error: File '"<<file<<"' not found.";
+    return 1;
+  }
+  sortedList(Test,Test.size());  
+  return 0;
+
+}
+
+
