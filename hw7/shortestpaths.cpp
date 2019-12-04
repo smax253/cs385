@@ -20,7 +20,7 @@
 using namespace std;
 struct Edge{
     string from, to;
-    int weight;
+    long long int weight;
     int fromIndex, toIndex;
     Edge(string _from, string _to, int _weight) : from(_from), to(_to), weight(_weight){
         fromIndex = _from[0]-'A';
@@ -28,7 +28,7 @@ struct Edge{
     }
 };
 
-int num_digits(size_t num) {
+int num_digits(long long int num) {
     //Finds the number of digits in a given integer num.
     int counter = 0;
     while(num>0){
@@ -37,9 +37,33 @@ int num_digits(size_t num) {
     }
     return counter;
 }
+vector<char> findPath(vector<vector<string>> intermediates, int start, int end){
+    vector<char> output;
+    char startchar = 'A' + start;
+    char endchar = 'A' + end;
+    if (start == end) {
+        output.push_back(startchar);
+    }
+    else{
+        char intermediate = intermediates[start][end][0];
+        int intIndex = intermediate - 'A';
+        if (intermediate == '-') {
+            output.push_back(startchar);
+            output.push_back(endchar);
+        }
+        else{
+            output = findPath(intermediates, start, intIndex);
+            vector<char> addition = findPath(intermediates, intIndex, end);
+            for(size_t i = 1; i<addition.size(); i++){
+                output.push_back(addition[i]);
+            }
+        }
+    }
+    return output;
+}
 
 void printPaths(vector<vector<long long int>> distMatrix, vector<vector<long long int>> minWeights, vector<vector<string>> intermediates, unsigned int max_vertices, int max_distance){
-    int max_weight = 0;
+    long long int max_weight = 0;
     for(unsigned int i = 0; i<max_vertices; i++){
         for(unsigned int j = 0; j<max_vertices; j++){
             if(minWeights[i][j]>max_weight) max_weight = minWeights[i][j];
@@ -111,20 +135,14 @@ void printPaths(vector<vector<long long int>> distMatrix, vector<vector<long lon
             }
             else{
                 cout<<from<<" -> "<<to<<", distance: "<<minWeights[i][j]<<", path: ";
-                if(i==j) cout<<from<<endl;
-                else{
-                    int counter = 0;
-                    char current = intermediates[i][j][0];
-                    while(current != '-' && counter<10){
-                        cout<<from<<" -> ";
-                        from = current;
-                        int fromindex = current-'A';
-                        current = intermediates[fromindex][j][0];  
-                        ++counter; 
-                    }
-                    cout<<from<<" -> "<<to<<endl;
-                    
+                stringstream path;
+                vector<char> pathChars = findPath(intermediates, i, j);
+                auto it = pathChars.cbegin();
+                for(auto end = pathChars.cend(); it != end-1; ++it){
+                    path<<*it<<" -> ";
                 }
+                path<<*it;
+                cout<<path.str()<<endl;
             }
         }
     }
@@ -152,7 +170,7 @@ void shortestPaths(vector<Edge> edges, unsigned int max_vertices){
         for(size_t i = 0; i<max_vertices; i++){
             for (size_t j = 0; j<max_vertices; j++){
                 if(minWeights[i][k] != -1 && minWeights[k][j] != -1){
-                    int pathlength = minWeights[i][k] + minWeights[k][j];
+                    long long int pathlength = minWeights[i][k] + minWeights[k][j];
                     if(minWeights[i][j] == -1 || minWeights[i][j]>pathlength) {
                         minWeights[i][j] = pathlength;
                         intermediates[i][j] = 'A' + k;
