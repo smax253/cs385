@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Name        : rbtree.h
- * Author      : 
+ * Author      : Max Shi and Constance Xu
  * Version     : 1.0
- * Date        : 
+ * Date        : 11/17/2019
  * Description : Implementation of red-black tree.
- * Pledge      :
+ * Pledge      : I pledge my honor that I have abided by the Stevens Honor System.
  ******************************************************************************/
 #ifndef RBTREE_H_
 #define RBTREE_H_
@@ -19,7 +19,7 @@
 #include <sstream>
 #include <algorithm>
 #include <utility>
-
+using namespace std;
 // Forward declaration
 template <typename K, typename V>
 class RedBlackTree;
@@ -207,26 +207,33 @@ public:
      */
     void insert(const iterator &it, const std::pair<K, V> &key_value) {
         const K& key = key_value.first;
+        size_ += 1;
         Node<K, V> *x, *y; //x is current node, y is parent
         if (it != end()) {
             x = it.node_ptr;
             y = x->parent;
         } else {
             x = root_;
-            y = NULL;
+            y = nullptr;
         }
-        while (x!=NULL){
+        while (x!=nullptr){
             y=x;
-            if(key<x->key()){
+            if (key == x->key()){
+                size_--;
+                stringstream ss;
+                ss<<"Attempt to insert duplicate key \'"<<key<<"\'.";
+                throw tree_exception(ss.str());
+            }
+            else if(key<x->key()){
                 x = x->left;
             }
             else{
                 x = x->right;
             }
         }
-        Node<K,V> *z = new Node(key_value.first, key_value.second);
+        Node<K,V> *z = new Node<K,V>(key_value.first, key_value.second);
         z->parent = y;
-        if(y == NULL){
+        if(y == nullptr){
             root_ = z;
         }
         else if(z->key()<y->key()){
@@ -373,16 +380,56 @@ private:
      * Deletes all nodes from the red-black tree.
      */
     void delete_tree(Node<K, V> *n) {
-        // TODO
+        if (n == nullptr) return;
+        if (n->left != nullptr)  delete_tree(n->left);
+        if (n->right != nullptr)  delete_tree(n->right);
+        delete n;
     }
 
     /**
      * Fixup method described on p. 316 of CLRS.
      */
     void insert_fixup(Node<K, V> *z) {
-        // TODO
-        while(z->parent!=NULL && z->parent->color == RED){
-        
+        Node<K,V> *y;
+        while(z->parent!=nullptr && z->parent->color == RED){
+            if(z->parent->parent != nullptr){
+                if (z->parent == z->parent->parent->left){
+                    y = z->parent->parent->right;
+                    if (y != nullptr && y->color == RED){
+                        z->parent->color = BLACK;
+                        y->color = BLACK;
+                        z->parent->parent->color = RED;
+                        z = z->parent->parent;
+                    }
+                    else{
+                        if(z == z->parent->right){
+                            z = z->parent;
+                            left_rotate(z);
+                        }
+                        z->parent->color = BLACK;
+                        z->parent->parent->color = RED;
+                        right_rotate(z->parent->parent);
+                    } 
+                }
+                else if(z->parent == z->parent->parent->right){
+                    y = z->parent->parent->left;
+                    if (y != nullptr && y->color == RED){
+                        z->parent->color = BLACK;
+                        y->color = BLACK;
+                        z->parent->parent->color = RED;
+                        z = z->parent->parent;
+                    }
+                    else{
+                        if(z == z->parent->left){
+                            z = z->parent;
+                            right_rotate(z);
+                        }
+                        z->parent->color = BLACK;
+                        z->parent->parent->color = RED;
+                        left_rotate(z->parent->parent);
+                    } 
+                }
+            }
         }
         // Last line below
         root_->color = BLACK;
@@ -392,14 +439,38 @@ private:
      * Left-rotate method described on p. 313 of CLRS.
      */
     void left_rotate(Node<K, V> *x) {
-        // TODO
+        Node<K,V> *y = x->right;
+        x->right = y->left;
+        if (y->left != nullptr)
+            y->left->parent = x;
+        y->parent = x->parent;
+        if (x->parent == nullptr)
+            root_ = y;
+        else if(x == x->parent->left)
+            x->parent->left = y;
+        else
+            x->parent->right = y;
+        y->left = x;
+        x->parent = y;
     }
 
     /**
      * Right-rotate method described on p. 313 of CLRS.
      */
     void right_rotate(Node<K, V> *x) {
-        // TODO
+        Node<K,V> *y = x->left;
+        x->left = y->right;
+        if (y->right != nullptr)
+            y->right->parent = x;
+        y->parent = x->parent;
+        if (x->parent == nullptr)
+            root_ = y;
+        else if(x == x->parent->right)
+            x->parent->right = y;
+        else
+            x->parent->left = y;
+        y->right = x;
+        x->parent = y;
     }
 
     /**
@@ -407,7 +478,10 @@ private:
      * A null node starts at height -1.
      */
     int height(Node<K, V> *node) const {
-        // TODO
+        if (node == nullptr) return -1;
+        int left = 1+height(node->left);
+        int right = 1+height(node->right);
+        return std::max(left, right);
     }
 
     /**
@@ -415,7 +489,10 @@ private:
      * For this method, a leaf is a non-null node that has no children.
      */
     size_t leaf_count(Node<K, V> *node) const {
-        // TODO
+        if (node == nullptr) return 0;
+        else if (node->left == nullptr && node->right == nullptr) return 1;
+        else return leaf_count(node->left) + leaf_count(node->right);
+        
     }
 
     /**
@@ -424,9 +501,24 @@ private:
      * An internal node has at least one child.
      */
     size_t internal_node_count(Node<K, V> *node) const {
-        // TODO 
+        if (node == nullptr) return 0;
+        else if(node->left == nullptr && node->right == nullptr) return 0;
+        else return 1+ internal_node_count(node->left) + internal_node_count(node->right);
+        return 1;
     }
-
+    /**
+     * Helper where first element is longest path and second element is longest run
+     */
+    pair<int, int> helperDiameter(Node<K, V> *node) const{
+        if(node == nullptr) return pair<int,int>(0,0);
+        pair<int,int> left = helperDiameter(node->left);
+        pair<int,int> right = helperDiameter(node->right);
+        int paththrunode = left.second + right.second + 1;
+        int longestChildPath = max(left.first, right.first);
+        int maxRun = max(left.second, right.second) + 1;
+        int maxPath = max(longestChildPath, paththrunode);
+        return pair<int,int>(maxPath, maxRun);
+    }
     /**
      * Returns the diameter of the red-black tree rooted at node.
      * Diameter is defined as the number of nodes on the longest path between
@@ -435,6 +527,9 @@ private:
      */
     int diameter(Node<K, V> *node) const {
         // TODO depth first search??
+        if (node == nullptr) return 0;
+        pair<int, int> result = helperDiameter(node);
+        return result.first-1;
     }
 
     /**
@@ -442,7 +537,9 @@ private:
      * Width is defined as the number of nodes residing at a level.
      */
     size_t width(Node<K, V> *node, size_t level) const {
-        // TODO
+        if (node == nullptr) return 0;
+        else if (level == 0) return 1;
+        else return width(node->left, level-1) + width(node->right, level-1);
     }
 
     size_t null_count() const {
@@ -453,10 +550,12 @@ private:
      * Returns the count of null nodes in the red-black tree starting at node.
      */
     size_t null_count(Node<K, V> *node) const {
-        // TODO
+        if(node == nullptr) return 1;
+        return null_count(node->right) + null_count(node->left);
     }
 
     size_t sum_levels() const {
+        //cout<<sum_levels(root_, 0)<<endl;
         return sum_levels(root_, 0);
     }
 
@@ -472,10 +571,12 @@ private:
      * has sum 0 + 2(1) + 2 = 4.
      */
     size_t sum_levels(Node<K, V> *node, size_t level) const {
-        // TODO
+        if (node == nullptr) return 0;
+        return level + sum_levels(node->left, level+1) + sum_levels(node->right, level+1);
     }
 
     size_t sum_null_levels() const {
+        //cout<<sum_null_levels(root_, 0)<<endl;
         return sum_null_levels(root_, 0);
     }
 
@@ -493,7 +594,8 @@ private:
      * has sum 3(2) + 2(3) = 12.
      */
     size_t sum_null_levels(Node<K, V> *node, size_t level) const {
-        // TODO
+        if (node == nullptr) return level;
+        return sum_null_levels(node->right, level+1) + sum_null_levels(node->left, level+1);
     }
 };
 

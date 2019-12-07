@@ -1,0 +1,264 @@
+/*******************************************************************************
+ * Name        : anagramfinder.cpp
+ * Author      : Max Shi
+ * Date        : 9/17/2019
+ * Description : Determines the strings with largets number of anagrams in an input stream.
+ * Pledge      : I pledge my honor that I have abided by the Stevens Honor System.
+ ******************************************************************************/
+#include <iostream>
+#include <algorithm>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <thread>
+#include <utility>
+#include <future>
+using namespace std;
+
+int globalCounter = 0;
+
+string stringCountingSort(const string &input){
+    vector<int> chars(26);
+    string result;
+    for(size_t i = 0; i<input.size(); i++){
+        int current = input[i] - 'a';
+        int capitalcurrent = input[i] - 'A';
+        if (current<26 && current >=0) chars[current]++;
+        else if (capitalcurrent<26 && capitalcurrent>=0) chars[capitalcurrent]++;
+        else return input;
+    }
+    
+    result.reserve(input.size());
+    for(size_t i = 0; i<chars.size(); i++){
+        for(int j = 0; j<chars[i]; j++){
+            result.push_back((char)(i+'a'));
+        }
+    }
+    return result;
+}
+
+void findAnagrams(vector<vector<vector<string>>> *result, vector<string> *inputs, bool *ready){
+    auto stringCountingSort = [](string &input){
+        vector<int> chars(26);
+        string result;
+        for(char c : input){
+            int current = c - 'a';
+            int capitalcurrent = c - 'A';
+            if (current<26 && current >=0) chars[current]++;
+            else if (capitalcurrent<26 && capitalcurrent>=0) chars[capitalcurrent]++;
+            else return result;
+        }
+        result.reserve(input.size());
+        for(size_t i = 0; i<chars.size(); i++){
+            for(int j = 0; j<chars[i]; j++){
+                result.push_back((char)(i+'a'));
+            }
+        }
+        return result;
+    };
+    //cout<<"ready: "<<*ready<<endl;
+    vector<string> maxKey;
+    unsigned int maxanagrams = 2;
+    multimap<string, string> table;
+    size_t currSize = 0;
+    bool threadReady = false;
+    insert:
+    do{
+        size_t size = inputs->size();
+        //cout<<"size: "<<size<<endl;
+        if (size > currSize){
+            //cout<<inputs->size();
+            string current = (*inputs)[currSize];
+            //cout<<current<<endl;
+            //cout<<"HELP"<<endl;
+            //cout<<current<<endl;
+            string sorted = stringCountingSort(current);
+            if(sorted.size()>0){
+                unsigned int currentAnagrams = table.count(sorted);
+                if (currentAnagrams){
+                    table.insert(pair<string, string> (sorted, current));
+                    ++currentAnagrams;
+                    if (currentAnagrams > maxanagrams){
+                        maxKey.clear();
+                        maxKey.push_back(sorted);
+                        maxanagrams = currentAnagrams;
+                    }else if(currentAnagrams == maxanagrams){
+                        maxKey.push_back(sorted);
+                    }
+                }else{
+                    table.insert(pair<string, string>(sorted, current));
+                }
+            }
+            ++currSize;
+        }
+        if (inputs->size() == currSize || (*ready && inputs->size() == 0)) threadReady = true;
+    }
+    while(!(*ready) || !threadReady);
+    
+    if (inputs->size() != currSize) goto insert;
+    //cout<<"Array Size: " <<inputs->size()<<", Map size : "<<table.size()<<", Curr size : "<<currSize<<", Max anagrams: "<<maxanagrams<<", maxkey: "<<maxKey.size() <<endl;
+    //cout<<maxanagrams<<endl;
+    
+    vector<vector<string>> anagrams;
+    
+    for(size_t i = 0; i<maxKey.size(); i++){
+        auto itr = table.equal_range(maxKey[i]);
+        vector<string> toAdd;
+        for (auto it = itr.first; it != itr.second; ++it)
+            toAdd.push_back(it->second);
+        anagrams.push_back(toAdd);
+    }
+    result->push_back(anagrams);
+    table.clear();
+    /* if(anagrams.size() != 0){
+        result->push_back(anagrams);
+        cout<<"result pushed"<<endl;
+    }
+    if(inputs->size() > 0)
+        cout<<(*inputs)[0].size()<<" finished"<<endl;
+    else
+        cout<<"empty finished"<<endl;
+    globalCounter++;
+    cout<<"global counter: " <<globalCounter<<endl; */
+    return;
+}
+
+int main(int argc, char * const argv[]) {
+    // Reads and parses command line arguments.
+    // Calls other functions to produce correct output.
+    if(argc!=2){
+        cerr << "Usage: " << argv[0] << " <dictionary file>"
+             << endl;
+        return 1; 
+    }
+    vector<string> *allWords = new vector<string>();
+    string word;
+    ifstream dictFile;
+    dictFile.open(argv[1]);
+    if(dictFile.is_open()) {
+        while(dictFile.good()) {
+            getline(dictFile,word);
+            allWords->push_back(word);
+        }
+        dictFile.close();
+    }
+    size_t totalSize = (*allWords).size();
+    if (totalSize == 0) {
+        cerr<<"Error: File \'"<<argv[1]<<"\' not found.";
+        return 1;
+    }
+    //cout<<totalSize<<endl;
+    vector<vector<string>*> splitLengths;
+    splitLengths.reserve(31);
+    vector<double> distributions{0.001,0.01, 0.03, 0.055, 0.085, 0.13, 0.15, 0.15, 0.135, 0.105, 0.08, 0.055, 0.035, 0.025, 0.015, 0.01, 0.007};
+    bool ready = false;
+    for(size_t i = 0; i<30; i++){
+        vector<string>* toAdd = new vector<string>();
+        if (i<distributions.size()){
+            //cout<<(int)(totalSize*distributions[i])<<endl;
+            toAdd->reserve((int)(totalSize*distributions[i]));
+        }
+        else{
+            toAdd->reserve((int)(0.005*totalSize));
+        }
+        splitLengths.push_back(toAdd);
+    }
+    //cout<<splitLengths.size()<<endl;
+    vector<vector<vector<string>>> *results = new vector<vector<vector<string>>>();
+    
+    results->reserve(30);
+    
+    vector<thread> threadsvec;
+    for(size_t i = 2; i<splitLengths.size(); i++){
+        thread nextThread(findAnagrams, results, splitLengths[i], &ready);
+        threadsvec.push_back(move(nextThread));
+    }
+   
+    for(auto it = allWords->cbegin(); it != allWords->cend(); ++it){
+        //cout<<*it<<endl;
+        if (it->size() <= 30)
+            splitLengths[it->size()]->push_back(*it);
+        //if(it->size() == 4) cout<<"added"<<endl;
+    }
+    //cout<<splitLengths[5]->size()<<endl;
+    
+    /* for (size_t i = 0; i<splitLengths.size(); i++){
+        findAnagrams(results, splitLengths[i], &ready);
+    } */
+    delete allWords;
+   
+    //cout<<splitLengths[4]->size()<<endl;
+    //splitLengths.size()
+    
+    /*
+    size_t k = 8;
+    cout<<splitLengths[k].size()<<endl;
+    if (splitLengths[k].size() > 0){
+        vector<vector<string>> anagrams = findAnagrams(splitLengths[k]);
+        for(size_t i = 0; i<anagrams.size(); i++){
+            for(size_t j = 0; j<anagrams[i].size(); j++){
+                vector<string> anas = anagrams[i];
+                cout<<anas[j]<<endl;
+            }
+            cout<<endl;
+        }
+    }
+    */
+    vector<vector<string>> maxanagrams;
+    unsigned int maxnumber = 2;
+    
+    for(size_t k = 0; k<threadsvec.size(); k++){
+        ready = true;
+        //cout<<"\n**************\njoining : "<<k<<"\n**************\n";
+        threadsvec[k].join();
+    } 
+    //this_thread::sleep_for(std::chrono::milliseconds(50));
+    cout<<results->size()<<endl;
+    for(size_t k = 0; k<results->size(); k++){
+        //cout<<(*results)[k].size()<<endl;
+        if ((*results)[k].size() > 0){
+            vector<vector<string>> anagrams = results->at(k);
+            for(size_t i = 0; i<anagrams.size(); i++){
+                vector<string> anas = anagrams[i];
+                if (anas.size() > maxnumber){
+                    maxnumber = anas.size();
+                    maxanagrams = vector<vector<string>>();
+                    maxanagrams.push_back(anas);
+                }
+                else if (anas.size() == maxnumber){
+                    maxanagrams.push_back(anas);
+                }
+                
+            }
+        }
+        //splitLengths[k].clear();
+    }
+    if(maxanagrams.size() == 0) cout<<"No anagrams found.";
+    else{
+        cout<<"Max anagrams: " << maxnumber<<endl;
+        map<string, size_t> indexes;
+        vector<string> firsts;
+        for(size_t i = 0; i<maxanagrams.size(); i++){
+            sort(maxanagrams[i].begin(), maxanagrams[i].end());
+            firsts.push_back(maxanagrams[i][0]);
+            indexes.insert(pair<string, size_t>(maxanagrams[i][0], i));
+        }
+        sort(firsts.begin(), firsts.end());
+        for(size_t i = 0; i<firsts.size(); i++){
+            vector<string> toPrint = maxanagrams[indexes[firsts[i]]];
+            for (size_t j = 0; j<toPrint.size(); j++){
+                cout<<toPrint[j]<<endl;
+            }
+            cout<<endl;
+        }
+    }
+    
+    
+    //cout<<stringCountingSort("hello");
+    goto cleanup;
+    cleanup:
+    delete results;
+    
+    return 0;
+}

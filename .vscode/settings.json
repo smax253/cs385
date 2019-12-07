@@ -19,6 +19,10 @@
         "type_traits": "cpp",
         "xhash": "cpp",
         "xutility": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "anagramfinderworking": "cpp",
+        "chrono": "cpp",
+        "string": "cpp",
+        "xiosbase": "cpp"
     }
 }
