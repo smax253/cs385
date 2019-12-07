@@ -98,7 +98,7 @@ int main(int argc, char * const argv[]) {
     
     vector<vector<string>> splitLengths;
     splitLengths.reserve(31);
-    vector<double> distributions{0.0001,0.001, 0.002, 0.02, 0.04, 0.065, 0.1, 0.15, 0.15, 0.15, 0.15, 0.15, 0.1, 0.08, 0.05, 0.03, 0.03, 0.015, 0.006};
+    vector<double> distributions = {0.0001,0.001, 0.002, 0.02, 0.04, 0.065, 0.1, 0.15, 0.15, 0.15, 0.15, 0.15, 0.1, 0.08, 0.05, 0.03, 0.03, 0.015, 0.006};
     
     for(size_t i = 0; i<31; i++){
         vector<string> toAdd;
